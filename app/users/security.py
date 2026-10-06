@@ -1,3 +1,6 @@
+import hashlib
+import hmac
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -50,3 +53,36 @@ def decode_token(token: str, expected_type: str) -> dict | None:
     if payload.get("type") != expected_type:
         return None
     return payload
+
+# ---------- Parolni tiklash (email kodi bilan) ----------
+
+def generate_reset_code() -> str:
+    """6 xonali tasodifiy kod (secrets: kriptografik xavfsiz)."""
+    return f"{secrets.randbelow(10**6):06d}"
+
+
+def hash_reset_code(reset_id: str, code: str) -> str:
+    """Kodni bazada ochiq saqlamaymiz: HMAC(SECRET_KEY, reset_id:code)."""
+    return hmac.new(
+        settings.SECRET_KEY.encode(),
+        f"{reset_id}:{code}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def create_reset_session_token(reset_id: str) -> str:
+    """1-token: /forgot-password dan keyin beriladi, faqat kodni tekshirishga yaraydi."""
+    return _create_token(
+        reset_id, "reset_session", timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES)
+    )
+
+
+def create_reset_confirm_token(reset_id: str) -> str:
+    """2-token: kod to'g'ri bo'lgandan keyin beriladi, faqat parolni o'zgartirishga yaraydi."""
+    return _create_token(
+        reset_id, "reset_confirm", timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES)
+    )
+
+
+# Foydalanuvchi topilmaganda ham vaqt bir xil ketishi uchun (timing attack'dan himoya)
+DUMMY_HASH = hash_password("dummy-password")
