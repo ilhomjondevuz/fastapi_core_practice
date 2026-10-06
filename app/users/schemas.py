@@ -1,13 +1,17 @@
 from pydantic import BaseModel
 
 
-class CreateUser(BaseModel):
+class UserData(BaseModel):
+    id: int
     username: str
     email: str
-    password1: str
-    password2: str
+    first_name: str | None = None
+    last_name: str | None = None
+    phone: str | None = None
+    avatar: str | None = None  # bu yerda to'liq URL qaytadi
 
-class CreatedUser(BaseModel):
+
+class RegisteredUser(BaseModel):
     success: bool
     message: str
-    data: CreateUser
+    data: UserData

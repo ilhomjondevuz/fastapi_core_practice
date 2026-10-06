@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
+from starlette.staticfiles import StaticFiles
 
 from app.users.routes import auth_router
+from app.users.utils import MEDIA_ROOT, STATIC_ROOT
 
 app = FastAPI(
     title="My FastAPI App",
@@ -10,6 +12,9 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
+app.mount("/media", StaticFiles(directory=MEDIA_ROOT), name="media")
+
 app.include_router(auth_router)
 
 @app.get("/")

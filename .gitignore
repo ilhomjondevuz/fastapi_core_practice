@@ -34,3 +34,6 @@ Thumbs.db
 # Database
 *.db
 *.sqlite3
+
+# Media files
+media
