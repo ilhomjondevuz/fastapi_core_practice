@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic import EmailStr
 
 
 class UserData(BaseModel):
@@ -15,3 +16,14 @@ class RegisteredUser(BaseModel):
     success: bool
     message: str
     data: UserData
+
+class LoginUser(BaseModel):
+    username_or_email: str | EmailStr
+    password: str
+
+class LoginResponse(BaseModel):
+    success: bool
+    message: str
+    access_token: str
+    refresh_token: str
+    token_type: str

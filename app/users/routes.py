@@ -9,11 +9,12 @@ from sqlalchemy import func, or_, select
 from app.users.validators import (
     raise_if_errors, validate_password, validate_phone, validate_username,
 )
-from app.users.schemas import RegisteredUser, UserData
+from app.users.schemas import RegisteredUser, UserData, LoginUser, LoginResponse
 from app.database import get_session
 from app.users.models import User
 from app.users.utils import save_avatar, delete_avatar
-from app.users.security import hash_password
+from app.users.security import hash_password, verify_password, create_access_token, create_refresh_token
+from app.core.security import DUMMY_HASH
 
 auth_router = APIRouter(
     prefix="/api/v1/auth",
@@ -128,6 +129,73 @@ async def create_user(
             first_name=new_user.first_name,
             last_name=new_user.last_name,
             phone=new_user.phone,
+            avatar=avatar_url,
+        ),
+    )
+
+@auth_router.post(
+    "/login",
+    status_code=status.HTTP_200_OK,
+    response_model=LoginResponse,
+    name="Login",
+)
+async def login_user(
+    request: Request,
+    user: LoginUser,
+    session: AsyncSession = Depends(get_session),
+):
+    # 1. Normallashtirish
+    identifier = user.username_or_email.strip().lower()
+
+    # 2. Username yoki email bo'yicha qidirish (katta-kichik harfsiz)
+    result = await session.execute(
+        select(User).where(
+            or_(
+                func.lower(User.email) == identifier,
+                func.lower(User.username) == identifier,
+            )
+        )
+    )
+    db_user = result.scalars().first()
+
+    # 3. Parolni tekshirish (bcrypt og'ir, shuning uchun thread'da)
+    password_ok = await run_in_threadpool(
+        verify_password,
+        user.password,
+        db_user.password if db_user else DUMMY_HASH,
+    )
+
+    if not db_user or not password_ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Username/email yoki parol noto'g'ri",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 4. Tokenlar
+    access_token = create_access_token(db_user.id)
+    refresh_token = create_refresh_token(db_user.id)
+
+    # 5. Avatar to'liq URL bilan
+    avatar_url = (
+        str(request.url_for("media", path=db_user.avatar))
+        if db_user.avatar
+        else None
+    )
+
+    return LoginResponse(
+        success=True,
+        message="Muvaffaqiyatli kirdingiz",
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        data=UserData(
+            id=db_user.id,
+            username=db_user.username,
+            email=db_user.email,
+            first_name=db_user.first_name,
+            last_name=db_user.last_name,
+            phone=db_user.phone,
             avatar=avatar_url,
         ),
     )
