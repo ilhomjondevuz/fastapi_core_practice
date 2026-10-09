@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -86,3 +87,18 @@ def create_reset_confirm_token(reset_id: str) -> str:
 
 # Foydalanuvchi topilmaganda ham vaqt bir xil ketishi uchun (timing attack'dan himoya)
 DUMMY_HASH = hash_password("dummy-password")
+
+def _make_token(sub, token_type: str, expires: timedelta) -> str:
+    payload = {
+        "sub": str(sub),
+        "type": token_type,
+        "jti": uuid.uuid4().hex,
+        "exp": datetime.now(timezone.utc) + expires,
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+def create_refresh_token(user_id) -> str:
+    return _make_token(user_id, "refresh", timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
+
+def create_verify_token(user_id) -> str:
+    return _make_token(user_id, "verify", timedelta(hours=settings.VERIFY_TOKEN_EXPIRE_HOURS))

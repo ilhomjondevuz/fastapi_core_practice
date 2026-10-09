@@ -45,3 +45,7 @@ async def send_reset_email(to: str, code: str) -> None:
     except Exception:
         # Background task'da xato foydalanuvchiga qaytmaydi, shuning uchun logga yozamiz
         logger.exception("Reset email yuborilmadi: %s", to)
+
+def send_verification_email(to_email: str, token: str) -> None:
+    link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    # yuborish usuli send_reset_email'dagi bilan bir xil bo'lsin

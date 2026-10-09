@@ -64,3 +64,36 @@ class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password1: str
     new_password2: str
+
+class RefreshTokenIn(BaseModel):
+    refresh_token: str
+
+class TokenOut(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+class LogoutIn(BaseModel):
+    refresh_token: str
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    first_name: str | None = None
+    last_name: str | None = None
+    phone: str | None = None
+    avatar: str | None = None      # to'liq URL
+    is_verified: bool
+
+class UserUpdate(BaseModel):
+    first_name: str | None = Field(None, max_length=50)
+    last_name: str | None = Field(None, max_length=50)
+    phone: str | None = Field(None, pattern=r"^\+?[0-9]{9,15}$")
+    avatar: str | None = None  # URL; fayl yuklash kerak bo'lsa pastga qarang
+
+class VerifyEmailIn(BaseModel):
+    token: str
+
+class ResendVerificationIn(BaseModel):
+    email: EmailStr
