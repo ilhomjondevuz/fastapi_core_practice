@@ -31,3 +31,13 @@ async def get_current_user(
     if not user or not user.is_active:
         raise unauthorized
     return user
+
+async def get_current_staff(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not current_user.is_staff:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Faqat staff foydalanuvchilar uchun",
+        )
+    return current_user

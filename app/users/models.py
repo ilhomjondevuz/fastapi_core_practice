@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Integer, String, Boolean, DateTime, ForeignKey, false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -17,8 +17,8 @@ class User(Base):
     phone: Mapped[str] = mapped_column(String(13), nullable=True)
     avatar: Mapped[str] = mapped_column(String(100), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    is_staff: Mapped[bool] = mapped_column(default=False, server_default=false())
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
 

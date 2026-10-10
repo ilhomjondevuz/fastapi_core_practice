@@ -3,6 +3,8 @@ from starlette.staticfiles import StaticFiles
 
 from app.users.routes import auth_router
 from app.users.utils import MEDIA_ROOT, STATIC_ROOT
+from app.products.routes import products_router
+from app.orders.routes import orders_router
 
 app = FastAPI(
     title="My FastAPI App",
@@ -16,6 +18,8 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 app.mount("/media", StaticFiles(directory=MEDIA_ROOT), name="media")
 
 app.include_router(auth_router)
+app.include_router(products_router)
+app.include_router(orders_router)
 
 @app.get("/")
 async def read_root(request: Request):

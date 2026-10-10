@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-auth_router = APIRouter(
-    prefix="/auth",
-    tags=["auth"],
+orders_router = APIRouter(
+    prefix="/api/v1/orders",
+    tags=["orders"],
 )
 
-@auth_router.get("/me")
-async def read_users_me():
-    return {"my_info": "FIO: Test"}
+@orders_router.get("/get")
+async def read_users_me() -> dict:
+    return {"endpoint": "Orders"}
