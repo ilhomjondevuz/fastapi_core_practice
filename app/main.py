@@ -21,6 +21,10 @@ app.include_router(auth_router)
 app.include_router(products_router)
 app.include_router(orders_router)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.get("/")
 async def read_root(request: Request):
     base_url = str(request.base_url).rstrip("/")
