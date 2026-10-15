@@ -14,7 +14,7 @@ from app.users.security import (
 
 BASE = "/api/v1/auth"
 NO_AUTH = (401, 403)  # tokensiz so'rovda qaytadigan status (security sxemasiga bog'liq)
-INVALID_INPUT = (400, 422)
+INVALID_INPUT = (422,)  # raise_if_errors() doim 422 qaytaradi
 NEW_PASSWORD = "N3w!Passw0rd#77"
 
 
@@ -85,6 +85,12 @@ async def test_register_duplicate_username_case_insensitive(client, make_user, p
         f"{BASE}/register",
         data=register_data(password, username="JOHN_DOE", email="new@example.com"),
     )
+    assert r.status_code == 409
+
+
+async def test_register_duplicate_phone_is_409(client, make_user, password):
+    await make_user(phone="+998901234567")
+    r = await client.post(f"{BASE}/register", data=register_data(password))
     assert r.status_code == 409
 
 
@@ -262,9 +268,11 @@ async def test_update_me_partial_keeps_other_fields(client, make_user, auth):
     assert r.json()["last_name"] == "Name"
 
 
-async def test_update_me_empty_string_clears_field(client, make_user, auth):
+async def test_update_me_blank_string_clears_field(client, make_user, auth):
+    # Diqqat: FastAPI Form'dagi "" ni "yuborilmagan" (None) deb hisoblaydi,
+    # shuning uchun tozalash probel-only qiymat ("   ") bilan tekshiriladi.
     u = await make_user(first_name="Old")
-    r = await client.patch(f"{BASE}/me", data={"first_name": ""}, headers=auth(u))
+    r = await client.patch(f"{BASE}/me", data={"first_name": "   "}, headers=auth(u))
     assert r.status_code == 200
     assert r.json()["first_name"] is None
 

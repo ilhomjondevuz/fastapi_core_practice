@@ -27,6 +27,7 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    data: UserData
 
 class MessageResponse(BaseModel):
     success: bool

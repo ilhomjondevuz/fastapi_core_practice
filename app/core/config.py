@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = env.str('SMTP_PASSWORD')
     EMAIL_FROM: str = env.str('EMAIL_FROM')
 
+    VERIFY_TOKEN_EXPIRE_HOURS: int = env.int('VERIFY_TOKEN_EXPIRE_HOURS', 24)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",

@@ -52,7 +52,7 @@ async def engine():
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def session_maker(engine):
-    return async_sessionmaker(engine, expire_on_commit=True)
+    return async_sessionmaker(engine, expire_on_commit=False)  # app/database.py bilan bir xil
 
 
 @pytest_asyncio.fixture(autouse=True)
