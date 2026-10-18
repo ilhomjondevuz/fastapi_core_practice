@@ -29,6 +29,7 @@ async def health_check():
 async def read_root(request: Request):
     base_url = str(request.base_url).rstrip("/")
     return {
+        "message": "FastAPI Docker bilan ishlayapti!",
         "swagger_url": f"{base_url}/docs",
         "redoc_url": f"{base_url}/redoc",
         "openapi_url": f"{base_url}/openapi.json",
